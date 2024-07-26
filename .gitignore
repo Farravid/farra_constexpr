@@ -33,3 +33,6 @@
 
 #Vscode
 .vscode
+
+# Conan
+build/
