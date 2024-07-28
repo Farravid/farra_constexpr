@@ -1,40 +1,53 @@
 #include <print>
-#include <string_view>
-#include <map>
-
+#//include <gtest/gtest.h>
 #include "interval_map.hpp"
 
+// TEST(IntervalMapTest, Basic) 
+// {
+//     farra::interval_map<int, char, 3> map { {1, 'c'} };
+
+//     EXPECT_EQ(map.upper_bound(0)->second, 'c');
+// }
+
+
 template<typename T>
-void printContainer(T& container)
+constexpr void printContainer(T& container)
 {
   for(const auto& item : container)
     std::println("{}, {}", item.first, item.second);
 }
 
-int main()
+template<typename T>
+constexpr void printArray(T& container)
 {
-  // constexpr farra::interval_map<uint8_t, float, 5> im = 
-  // {
-  //   {1, 1.1f},
-  //   {5, 5.1f},
-  //   {10, 10.1f},
-  //   {15, 15.1f},
-  //   {20, 20.1f},
-  // };
+  for(const auto& item : container)
+    std::println("{}", item);
+}
 
-  constexpr farra::map<int,int, 2> map = { {1,5}, {2,10} };
-  //map.upper_bound(2);
+constexpr auto get_map_value()
+{
+  farra::interval_map<int,char, 5> map{ {10, 'c'} };
+  map.assign(3, 8, 'b');
+  //map.assign(1, 2, 'a');
+  //map.assign(20, 30, 'w');
+  return map;
+}
 
+int main(int argc, char **argv)
+{
 
-  //std::array<std::pair<int, int>, 2> a { std::pair{1,1}, {2,2}};
+  std::array<int, 5> a {1, 2, 3 ,4, 5};
 
-  //auto is_greater = [](auto arrayKey) { return true; };
-  //auto it = std::ranges::find_if(a, is_greater);
+  //farra::interval_map<int,char> map{ {1, 'a'}, {10, 'c'} };
 
-  //static_assert(map.cbegin()->second == 5);
-  static_assert(map.upper_bound(1)->second == 10);
+  auto x = a | std::views::take(2);
+  printArray(x);
 
-  //std::print("{}", map.upper_bound(4)->second);
-
-  //std::array<std::pair<int, int>, 2> array { std::pair{1,5}, {2,10} };
+  //testing::InitGoogleTest(&argc, argv);
+  //return RUN_ALL_TESTS();
+  
+  constexpr auto stuff = get_map_value();
+  //printContainer(stuff);
+  //static_assert(stuff.upper_bound(2)->second == 'b');
+  //static_assert(stuff.size() == 3);
 }

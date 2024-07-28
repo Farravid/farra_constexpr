@@ -1,2 +1,2 @@
 # farra_interval_map
-Constexpr interval map
+C++20 constexpr interval map
