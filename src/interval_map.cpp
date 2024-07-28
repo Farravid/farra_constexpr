@@ -26,9 +26,9 @@ constexpr void printArray(T& container)
 
 constexpr auto get_map_value()
 {
-  farra::interval_map<int,char, 5> map{ {10, 'c'} };
+  farra::flat_interval_map<int,char, 5> map{'z'};
   map.assign(3, 8, 'b');
-  //map.assign(1, 2, 'a');
+  map.assign(1, 2, 'a');
   //map.assign(20, 30, 'w');
   return map;
 }
@@ -40,14 +40,14 @@ int main(int argc, char **argv)
 
   //farra::interval_map<int,char> map{ {1, 'a'}, {10, 'c'} };
 
-  auto x = a | std::views::take(2);
-  printArray(x);
+  //auto x = a | std::views::take(2);
+  //printArray(x);
 
   //testing::InitGoogleTest(&argc, argv);
   //return RUN_ALL_TESTS();
   
   constexpr auto stuff = get_map_value();
-  //printContainer(stuff);
-  //static_assert(stuff.upper_bound(2)->second == 'b');
+  printContainer(stuff);
+  static_assert(stuff.lower_bound(2)->second == 'b');
   //static_assert(stuff.size() == 3);
 }
