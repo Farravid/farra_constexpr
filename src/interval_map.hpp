@@ -1,12 +1,10 @@
 #include <ranges>
 #include <algorithm>
+#include "util.hpp"
 
 //TODO: Include std::optional to allow for objects that are not default constructible
 //TODO: Constexpr allocator tha fuck? 
 //TODO: Understand iterators stuff
-
-template<typename T>
-concept has_operator_less = requires(T&& type) { T{} < T{}; };
 
 namespace farra
 {
@@ -15,6 +13,9 @@ namespace farra
     class flat_interval_map
     {
     public:
+        //=========================================================================
+		// Type aliases
+		//=========================================================================
         using key_type          		= _Key_t;
         using mapped_type       		= _Value_t;
         using value_type        		= std::pair<_Key_t, _Value_t>;
@@ -29,54 +30,59 @@ namespace farra
         using reverse_iterator  		= typename storage_type::iterator;
         using const_reverse_iterator 	= typename storage_type::const_iterator;
 
-        constexpr flat_interval_map(const std::initializer_list<value_type>& entries)
+        using a_key_type                = avoid_copy_t<key_type>;
+        using ca_key_type               = avoid_copy_t<const key_type>;
+        using a_mapped_type             = avoid_copy_t<mapped_type>;
+        using ca_mapped_type            = avoid_copy_t<const mapped_type>;
+
+        //=========================================================================
+		// Constructors
+		//=========================================================================
+        constexpr flat_interval_map(const std::initializer_list<value_type>& entries, const mapped_type& value)
+            : index_ {entries.size()}
+            , initialValue_ {value}
         {
-            index_ = entries.size();
             std::ranges::copy(entries, container_.begin());
         }
 
-        constexpr flat_interval_map(const mapped_type& value)
+        constexpr flat_interval_map(avoid_copy_t<const mapped_type> value)
             : initialValue_ {value}
         {
             std::ranges::fill(container_, value_type{0, value});
         }
 
-        //TODO: Const correctness with C++23
-
-        [[nodiscard]] constexpr const_iterator upper_bound(_Key_t key) const
+        //=========================================================================
+		// Element access
+		//=========================================================================
+        [[nodiscard]] constexpr auto&& operator[](this auto&& self, const key_type&& key)
         {
-            //!!: Parameters are never gonna be constexpr, so assuming that a parameter is constexpr will make the compiler to fail. We should not assume that and just remove the constexpr, just mark the function as constexpr and if the compiler is able to do that the execution will be compilation time. constexpr auto is_greater is bad!! Explain in obsidian 
-
-            //!!: Add the limits of std::vector constexpr, the memory should be freed before leaving the scope so there can't be any dynamic allocation becasuse we are in a constexpr world 
-
-            auto is_greater = [key](auto arrayKey) { return arrayKey.first > key; };
-            return std::ranges::find_if(container_, is_greater);
+            //TODO: Check this since is not returning the references as it should be
+            auto upper = self.upper_bound(key);
+            return upper == self.container_.cbegin() 
+                ? std::forward<decltype(self)>(self).initialValue_
+                : std::prev(upper)->second;
         }
 
-        // [[nodiscard]] constexpr const_iterator lower_bound(_Key_t key) const
-        // {
-		// 	auto is_not_less = [key](auto arrayKey) { return arrayKey.first >= key; };
-		// 	return std::ranges::find_if(container_, is_not_less);
-        // }
-
-		template<typename Self>
-		[[nodiscard]] constexpr auto lower_bound(this Self&& self, _Key_t key)
-		{
-			auto is_not_less = [key](auto arrayKey) { return arrayKey.first >= key; };
-			return std::ranges::find_if(self->container_, is_not_less);
-		}
-
+        //=========================================================================
+		// Iterators
+		//=========================================================================
         //TODO: We can avoid repeating with deducing this but that would not be friendly with stl containers I guess 
         [[nodiscard]] constexpr const_iterator cbegin() const noexcept { return container_.cbegin(); }
         [[nodiscard]] constexpr const_iterator cend() const noexcept { return cbegin() + index_; }
         [[nodiscard]] constexpr const_iterator begin() const noexcept { return container_.begin(); }
         [[nodiscard]] constexpr const_iterator end() const noexcept { return begin() + index_; }
 
-        [[nodiscard]] constexpr std::size_t size() const noexcept { return index_; }
+        //=========================================================================
+		// Capacity
+		//=========================================================================
         [[nodiscard]] constexpr bool empty() const noexcept { return size() == 0; }
+        [[nodiscard]] constexpr std::size_t size() const noexcept { return index_; }
+        [[nodiscard]] constexpr std::size_t max_size() const noexcept { return container_.max_size(); }
 
-
-        constexpr void assign(_Key_t keyBegin, _Key_t keyEnd, _Value_t value)
+        //=========================================================================
+		// Modifiers
+		//=========================================================================
+        constexpr void assign(ca_key_type keyBegin, ca_key_type keyEnd, ca_mapped_type value)
         {
             //TOOD: Check arihtmetics
             if(empty() && value != initialValue_) 
@@ -98,6 +104,34 @@ namespace farra
             //container_[index_] = value_type {keyBegin, value};
             //++index_;
         }
+
+        constexpr void clear(std::optional<mapped_type> value)
+        {
+            index_ = 0;
+            if(value.has_value()) 
+                initialValue_ = value.value();
+        }
+
+        //=========================================================================
+		// Lookup
+		//=========================================================================
+        [[nodiscard]] constexpr const_iterator upper_bound(_Key_t key) const
+        {
+            auto is_greater = [key](auto arrayKey) { return arrayKey.first > key; };
+            return std::ranges::find_if(container_, is_greater);
+        }
+
+        [[nodiscard]] constexpr const_iterator lower_bound(_Key_t key) const
+        {
+			auto is_not_less = [key](auto arrayKey) { return arrayKey.first >= key; };
+			return std::ranges::find_if(container_, is_not_less);
+        }
+
+        [[nodiscard]] constexpr bool contains(ca_key_type key) const
+        {
+            return std::ranges::contains(container_, key);
+        } 
+
 
     private:
         storage_type container_{};
