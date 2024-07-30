@@ -5,6 +5,7 @@
 //TODO: Include std::optional to allow for objects that are not default constructible
 //TODO: Constexpr allocator tha fuck? 
 //TODO: Understand iterators stuff
+//TODO: Check for comparation of keys and values concept 
 
 namespace farra
 {
@@ -31,9 +32,7 @@ namespace farra
         using const_reverse_iterator 	= typename storage_type::const_iterator;
 
         using a_key_type                = avoid_copy_t<key_type>;
-        using ca_key_type               = avoid_copy_t<const key_type>;
         using a_mapped_type             = avoid_copy_t<mapped_type>;
-        using ca_mapped_type            = avoid_copy_t<const mapped_type>;
 
         //=========================================================================
 		// Constructors
@@ -41,56 +40,40 @@ namespace farra
         explicit constexpr flat_interval_map(const std::initializer_list<value_type>& entries)
             : index_ {entries.size()}
         {
-            std::ranges::copy(entries, container_.begin());
+            //std::ranges::move(entries, container_.begin());
         }
 
-        explicit constexpr flat_interval_map(const std::initializer_list<value_type>& entries, const mapped_type& value)
+        explicit constexpr flat_interval_map(const std::initializer_list<value_type>& entries, a_mapped_type value)
             : index_ {entries.size()}
-            , initialValue_ {value}
+            //, initialValue_ {value}
         {
             std::ranges::copy(entries, container_.begin());
         }
 
-        explicit constexpr flat_interval_map(avoid_copy_t<const mapped_type> value)
-            : initialValue_ {value}
-        {
+        explicit constexpr flat_interval_map(a_mapped_type value)
+            //: initialValue_ {value}
+        { 
             std::ranges::fill(container_, value_type{0, value});
         }
 
         //=========================================================================
 		// Element access
 		//=========================================================================
-        // [[nodiscard]] constexpr auto&& operator[](this auto&& self, const key_type&& key)
-        // {
-        //     //TODO: Check this since is not returning the references as it should be
-        //     auto upper = self.upper_bound(key);
-        //     return upper == self.container_.cbegin() 
-        //         ? std::forward<decltype(self)>(self).initialValue_
-        //         : std::prev(upper)->second;
-        // }
-
-        [[nodiscard]] constexpr const mapped_type& operator[](const key_type&& key) const
+        [[nodiscard]] constexpr auto&& operator[](this auto&& self, a_key_type key)
         {
-            auto upper = upper_bound(key);
-            return upper == fbegin() 
-                ? initialValue_
-                : std::prev(upper)->second;
-        }
-
-        [[nodiscard]] constexpr mapped_type& operator[](const key_type&& key)
-        {
-            auto upper = upper_bound(key);
-            return upper == fbegin() 
-                ? initialValue_
-                : std::prev(upper)->second;
+            // //TODO: Now returns fine but we need to understand when to do std::forward properly
+            // auto upper = self.upper_bound(key);
+            // return upper == self.fbegin() 
+            //     ? self.initialValue_
+            //     : std::prev(upper)->second;
         }
 
         //=========================================================================
 		// Iterators
 		//=========================================================================
-        [[nodiscard]] constexpr auto fbegin(this auto&& self) noexcept { return &self.container_; }
-        [[nodiscard]] constexpr auto fend(this auto&& self) noexcept { return &self.container_ + self.index_; }
-        //[[nodiscard]] constexpr const_iterator fend(this auto&& self) noexcept { return container_.cbegin(); }
+        [[nodiscard]] constexpr auto fbegin(this auto&& self) noexcept { return &self.container_[0]; }
+        [[nodiscard]] constexpr auto fend(this auto&& self) noexcept { return &self.container_[0] + self.index_; }
+
         [[nodiscard]] constexpr const_iterator cbegin() const noexcept { return container_.cbegin(); }
         [[nodiscard]] constexpr const_iterator cend() const noexcept { return cbegin() + index_; }
         [[nodiscard]] constexpr const_iterator begin() const noexcept { return container_.begin(); }
@@ -106,15 +89,19 @@ namespace farra
         //=========================================================================
 		// Modifiers
 		//=========================================================================
-        constexpr void assign(ca_key_type keyBegin, ca_key_type keyEnd, ca_mapped_type value)
+        constexpr void assign(a_key_type keyBegin, a_key_type keyEnd, auto&& value)
         {
-            //TOOD: Check arihtmetics
-            if(empty() && value != initialValue_) 
+            //std::println("{}", __PRETTY_FUNCTION__);
+
+            //TODO: This is the important thing!!!!
+            //mapped_type x = std::forward<decltype(value)>(value);
+            //TODO: Check arihtmetics
+            //if(empty() && value != initialValue_) 
             {
-                container_[0] = value_type{keyBegin, value};
-                container_[1] = value_type{keyEnd, initialValue_};
-                index_ = 2;
-                return;
+                container_[0] = std::move(value_type{keyBegin, std::forward<decltype(value)>(value)});
+            //     container_[1] = value_type{keyEnd, initialValue_};
+            //     index_ = 2;
+            //     return;
             }
 
             if (keyBegin < cbegin()->first)
@@ -132,35 +119,43 @@ namespace farra
         constexpr void clear(std::optional<mapped_type> value = {})
         {
             index_ = 0;
-            if(value.has_value()) 
-                initialValue_ = value.value();
+            //if(value.has_value()) 
+            //    initialValue_ = value.value();
         }
 
         //=========================================================================
 		// Lookup
 		//=========================================================================
-        //TODO: C++23 const correctness too!!!
-        [[nodiscard]] constexpr const_iterator upper_bound(_Key_t key) const
+        [[nodiscard]] constexpr auto find(this auto&& self, a_key_type key)
         {
-            auto is_greater = [key](auto arrayKey) { return arrayKey.first > key; };
-            return std::ranges::find_if(container_, is_greater);
+            //TODO: How can we take the key as copy or reference in a lambda, can we do some magic?
+            //TODO: The auto arrayKey should be probably auto&& arrayKey, can be a copy or a reference
+            //TODO: We MUST create the object lifetime object to really test and know this stuff and create some test too 
+            //TODO: Should we change this to 2 container one keys and one values?
+            auto is_same = [key](auto&& arrayKey) { return arrayKey.first == key; };
+			return std::ranges::find_if(self.container_, is_same);
+        }
+        
+        [[nodiscard]] constexpr bool contains(a_key_type key) const
+        {
+            return find(key) != fend();
         }
 
-        [[nodiscard]] constexpr const_iterator lower_bound(_Key_t key) const
+        [[nodiscard]] constexpr auto lower_bound(this auto&& self, a_key_type key)
         {
-			auto is_not_less = [key](auto arrayKey) { return arrayKey.first >= key; };
-			return std::ranges::find_if(container_, is_not_less);
+			auto is_not_less = [key](auto&& arrayKey) { return arrayKey.first >= key; };
+			return std::ranges::find_if(self.container_, is_not_less);
         }
 
-        [[nodiscard]] constexpr bool contains(ca_key_type key) const
+        [[nodiscard]] constexpr auto upper_bound(this auto&& self, a_key_type key)
         {
-            return std::ranges::contains(container_, key);
-        } 
-
+            auto is_greater = [key](auto&& arrayKey) { return arrayKey.first > key; };
+            return std::ranges::find_if(self.container_, is_greater);
+        }
 
     private:
         storage_type container_{};
         std::size_t index_{};
-        mapped_type initialValue_{};
+        //mapped_type initialValue_{};
     };
 }

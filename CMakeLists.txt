@@ -6,7 +6,7 @@ set(PROJECT_NAME_TEST interval_map_test)
 set(PROJECT_NAME_BENCHMARK interval_map_benchmark)
 
 # This actually overrides the value from conan
-set(CMAKE_CXX_STANDARD 26)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Useful for visual code intelissense on Linux

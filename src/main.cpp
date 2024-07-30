@@ -1,58 +1,40 @@
-#include <print>
+#include "lifeobject.hpp"
 #include "interval_map.hpp"
 #include <map>
 
-template<typename T>
-constexpr void printContainer(T& container)
+template <typename T>
+constexpr void printContainer(T &container)
 {
-  for(const auto& item : container)
+  for (const auto &item : container)
     std::println("{}, {}", item.first, item.second);
 }
 
-template<typename T>
-constexpr void printArray(T& container)
+template <typename T>
+constexpr void printArray(T &container)
 {
-  for(const auto& item : container)
+  for (const auto &item : container)
     std::println("{}", item);
 }
 
 constexpr auto get_map_value()
 {
-  farra::flat_interval_map<int, char, 5> map 
-  { 
-    {{1, 'B'}, {3, 'W'}, {4, '.'}, {6, 'D'}, {8, '.'}}, '.'
-  };
+  farra::flat_interval_map<int, char, 5> map{
+      {{1, 'B'}, {3, 'W'}, {4, '.'}, {6, 'D'}, {8, '.'}}, '.'};
 
   map.clear({'z'});
-  map.assign(1,5, 'b');
+  map.assign(1, 5, 'b');
 
   return map;
 }
 
-struct S{ std::array<int, 100>a{}; int value {}; };
+using LO = farra::LifeObject<1000>;
 int main(int argc, char **argv)
 {
-  //constexpr auto stuff = get_map_value();
-  //printContainer(stuff);
-  //static_assert(stuff[0] == 'z');
 
-  farra::flat_interval_map<int, S, 2> im 
-  { 
-    {{1, S{ .value = 1} },
-    {5, S{ .value = 5} }},
-    S{ .value = 12}
-  };
+  LO lo{};
 
-  std::map<int,float> map{};
+  farra::flat_interval_map<int, LO, 1> im{};
+  im.assign(1, 5, std::move(lo));
 
-  auto it = map.upper_bound(2);
-
-  S& s = im[2];
-
-  //auto upper = im.upper_bound(-20);
-
-  //S& s = im[-20];
-
-  //std::println("{}", s.value);
-
+  return 0;
 }
