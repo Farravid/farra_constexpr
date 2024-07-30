@@ -29,11 +29,30 @@ constexpr auto get_map_value()
   return map;
 }
 
+struct S{ std::array<int, 100>a{}; int value {}; };
 int main(int argc, char **argv)
 {
-  constexpr auto stuff = get_map_value();
-  printContainer(stuff);
-  static_assert(stuff[0] == 'z');
+  //constexpr auto stuff = get_map_value();
+  //printContainer(stuff);
+  //static_assert(stuff[0] == 'z');
 
-  //return RUN_ALL_TESTS();
+  farra::flat_interval_map<int, S, 2> im 
+  { 
+    {{1, S{ .value = 1} },
+    {5, S{ .value = 5} }},
+    S{ .value = 12}
+  };
+
+  std::map<int,float> map{};
+
+  auto it = map.upper_bound(2);
+
+  S& s = im[2];
+
+  //auto upper = im.upper_bound(-20);
+
+  //S& s = im[-20];
+
+  //std::println("{}", s.value);
+
 }

@@ -5,7 +5,6 @@
 //TODO: Include std::optional to allow for objects that are not default constructible
 //TODO: Constexpr allocator tha fuck? 
 //TODO: Understand iterators stuff
-//TODO: Check with boost interval map comparation with google benchmark
 
 namespace farra
 {
@@ -39,6 +38,12 @@ namespace farra
         //=========================================================================
 		// Constructors
 		//=========================================================================
+        explicit constexpr flat_interval_map(const std::initializer_list<value_type>& entries)
+            : index_ {entries.size()}
+        {
+            std::ranges::copy(entries, container_.begin());
+        }
+
         explicit constexpr flat_interval_map(const std::initializer_list<value_type>& entries, const mapped_type& value)
             : index_ {entries.size()}
             , initialValue_ {value}
@@ -55,19 +60,37 @@ namespace farra
         //=========================================================================
 		// Element access
 		//=========================================================================
-        [[nodiscard]] constexpr auto&& operator[](this auto&& self, const key_type&& key)
+        // [[nodiscard]] constexpr auto&& operator[](this auto&& self, const key_type&& key)
+        // {
+        //     //TODO: Check this since is not returning the references as it should be
+        //     auto upper = self.upper_bound(key);
+        //     return upper == self.container_.cbegin() 
+        //         ? std::forward<decltype(self)>(self).initialValue_
+        //         : std::prev(upper)->second;
+        // }
+
+        [[nodiscard]] constexpr const mapped_type& operator[](const key_type&& key) const
         {
-            //TODO: Check this since is not returning the references as it should be
-            auto upper = self.upper_bound(key);
-            return upper == self.container_.cbegin() 
-                ? std::forward<decltype(self)>(self).initialValue_
+            auto upper = upper_bound(key);
+            return upper == fbegin() 
+                ? initialValue_
+                : std::prev(upper)->second;
+        }
+
+        [[nodiscard]] constexpr mapped_type& operator[](const key_type&& key)
+        {
+            auto upper = upper_bound(key);
+            return upper == fbegin() 
+                ? initialValue_
                 : std::prev(upper)->second;
         }
 
         //=========================================================================
 		// Iterators
 		//=========================================================================
-        //TODO: We can avoid repeating with deducing this but that would not be friendly with stl containers I guess 
+        [[nodiscard]] constexpr auto fbegin(this auto&& self) noexcept { return &self.container_; }
+        [[nodiscard]] constexpr auto fend(this auto&& self) noexcept { return &self.container_ + self.index_; }
+        //[[nodiscard]] constexpr const_iterator fend(this auto&& self) noexcept { return container_.cbegin(); }
         [[nodiscard]] constexpr const_iterator cbegin() const noexcept { return container_.cbegin(); }
         [[nodiscard]] constexpr const_iterator cend() const noexcept { return cbegin() + index_; }
         [[nodiscard]] constexpr const_iterator begin() const noexcept { return container_.begin(); }
@@ -116,6 +139,7 @@ namespace farra
         //=========================================================================
 		// Lookup
 		//=========================================================================
+        //TODO: C++23 const correctness too!!!
         [[nodiscard]] constexpr const_iterator upper_bound(_Key_t key) const
         {
             auto is_greater = [key](auto arrayKey) { return arrayKey.first > key; };

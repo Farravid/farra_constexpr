@@ -12,7 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # Useful for visual code intelissense on Linux
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_executable(${PROJECT_NAME} src/interval_map.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp)
 add_executable(${PROJECT_NAME_TEST} test/main.cpp)
 add_executable(${PROJECT_NAME_BENCHMARK} benchmark/main.cpp)
 
