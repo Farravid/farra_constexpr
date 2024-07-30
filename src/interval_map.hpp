@@ -5,6 +5,7 @@
 //TODO: Include std::optional to allow for objects that are not default constructible
 //TODO: Constexpr allocator tha fuck? 
 //TODO: Understand iterators stuff
+//TODO: Check with boost interval map comparation with google benchmark
 
 namespace farra
 {
@@ -38,14 +39,14 @@ namespace farra
         //=========================================================================
 		// Constructors
 		//=========================================================================
-        constexpr flat_interval_map(const std::initializer_list<value_type>& entries, const mapped_type& value)
+        explicit constexpr flat_interval_map(const std::initializer_list<value_type>& entries, const mapped_type& value)
             : index_ {entries.size()}
             , initialValue_ {value}
         {
             std::ranges::copy(entries, container_.begin());
         }
 
-        constexpr flat_interval_map(avoid_copy_t<const mapped_type> value)
+        explicit constexpr flat_interval_map(avoid_copy_t<const mapped_type> value)
             : initialValue_ {value}
         {
             std::ranges::fill(container_, value_type{0, value});
@@ -105,7 +106,7 @@ namespace farra
             //++index_;
         }
 
-        constexpr void clear(std::optional<mapped_type> value)
+        constexpr void clear(std::optional<mapped_type> value = {})
         {
             index_ = 0;
             if(value.has_value()) 

@@ -1,7 +1,0 @@
-[requires]
-benchmark/1.8.4
-gtest/1.14.0
-
-[generators]
-CMakeDeps
-CMakeToolchain
