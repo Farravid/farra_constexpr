@@ -37,21 +37,21 @@ namespace farra
         //=========================================================================
 		// Constructors
 		//=========================================================================
-        explicit constexpr flat_interval_map(const std::initializer_list<value_type>& entries)
-            : index_ {entries.size()}
-        {
-            //std::ranges::move(entries, container_.begin());
-        }
+        template<typename... Args>
+        explicit constexpr flat_interval_map(Args&&... entries)
+            : index_{sizeof...(Args)}
+            , container_{std::forward<Args>(entries)...} 
+        {};
 
-        explicit constexpr flat_interval_map(const std::initializer_list<value_type>& entries, a_mapped_type value)
-            : index_ {entries.size()}
-            //, initialValue_ {value}
-        {
-            std::ranges::copy(entries, container_.begin());
-        }
+        template<typename... Args>
+        explicit constexpr flat_interval_map(a_mapped_type value, Args&&... entries)
+            : index_{sizeof...(Args)}
+            , container_{std::forward<Args>(entries)...} 
+            , initialValue_ {value}
+        {};
 
         explicit constexpr flat_interval_map(a_mapped_type value)
-            //: initialValue_ {value}
+            : initialValue_ {value}
         { 
             std::ranges::fill(container_, value_type{0, value});
         }
@@ -61,18 +61,17 @@ namespace farra
 		//=========================================================================
         [[nodiscard]] constexpr auto&& operator[](this auto&& self, a_key_type key)
         {
-            // //TODO: Now returns fine but we need to understand when to do std::forward properly
-            // auto upper = self.upper_bound(key);
-            // return upper == self.fbegin() 
-            //     ? self.initialValue_
-            //     : std::prev(upper)->second;
+            auto upper = self.upper_bound(key);
+            return upper == self.fbegin() 
+                ? self.initialValue_
+                : std::prev(upper)->second;
         }
 
         //=========================================================================
 		// Iterators
 		//=========================================================================
         [[nodiscard]] constexpr auto fbegin(this auto&& self) noexcept { return &self.container_[0]; }
-        [[nodiscard]] constexpr auto fend(this auto&& self) noexcept { return &self.container_[0] + self.index_; }
+        [[nodiscard]] constexpr auto fend(this auto&& self) noexcept { return &self.container_[self.index_]; }
 
         [[nodiscard]] constexpr const_iterator cbegin() const noexcept { return container_.cbegin(); }
         [[nodiscard]] constexpr const_iterator cend() const noexcept { return cbegin() + index_; }
@@ -91,17 +90,16 @@ namespace farra
 		//=========================================================================
         constexpr void assign(a_key_type keyBegin, a_key_type keyEnd, auto&& value)
         {
-            //std::println("{}", __PRETTY_FUNCTION__);
+            if(!(keyBegin < keyEnd)) return;
+            if(empty() && value == initialValue_) return; 
 
-            //TODO: This is the important thing!!!!
-            //mapped_type x = std::forward<decltype(value)>(value);
             //TODO: Check arihtmetics
-            //if(empty() && value != initialValue_) 
+            if(empty()) 
             {
-                container_[0] = std::move(value_type{keyBegin, std::forward<decltype(value)>(value)});
-            //     container_[1] = value_type{keyEnd, initialValue_};
-            //     index_ = 2;
-            //     return;
+                container_[0] = {keyBegin, std::forward<decltype(value)>(value)};
+                container_[1] = {keyEnd, initialValue_};
+                index_ = 2;
+                return;
             }
 
             if (keyBegin < cbegin()->first)
@@ -111,16 +109,19 @@ namespace farra
                 ++index_;
             }
 
-            //std::ranges::copy()
-            //container_[index_] = value_type {keyBegin, value};
-            //++index_;
+            if(keyBegin > fbegin()->first && keyEnd > std::prev(fend())->first)
+            {
+                container_[1] = {keyBegin, std::forward<decltype(value)>(value)};
+                container_[2] = {keyEnd, initialValue_};
+                index_ = 3;
+            }
         }
 
         constexpr void clear(std::optional<mapped_type> value = {})
         {
             index_ = 0;
-            //if(value.has_value()) 
-            //    initialValue_ = value.value();
+            if(value.has_value()) 
+                initialValue_ = value.value();
         }
 
         //=========================================================================
@@ -129,8 +130,7 @@ namespace farra
         [[nodiscard]] constexpr auto find(this auto&& self, a_key_type key)
         {
             //TODO: How can we take the key as copy or reference in a lambda, can we do some magic?
-            //TODO: The auto arrayKey should be probably auto&& arrayKey, can be a copy or a reference
-            //TODO: We MUST create the object lifetime object to really test and know this stuff and create some test too 
+            //TODO: We MUST create tests for the object lifetime object to really test and know this stuff
             //TODO: Should we change this to 2 container one keys and one values?
             auto is_same = [key](auto&& arrayKey) { return arrayKey.first == key; };
 			return std::ranges::find_if(self.container_, is_same);
@@ -153,9 +153,9 @@ namespace farra
             return std::ranges::find_if(self.container_, is_greater);
         }
 
-    private:
+    public:
         storage_type container_{};
         std::size_t index_{};
-        //mapped_type initialValue_{};
+        mapped_type initialValue_{};
     };
 }

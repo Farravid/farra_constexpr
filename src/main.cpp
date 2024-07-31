@@ -16,25 +16,23 @@ constexpr void printArray(T &container)
     std::println("{}", item);
 }
 
-constexpr auto get_map_value()
-{
-  farra::flat_interval_map<int, char, 5> map{
-      {{1, 'B'}, {3, 'W'}, {4, '.'}, {6, 'D'}, {8, '.'}}, '.'};
-
-  map.clear({'z'});
-  map.assign(1, 5, 'b');
-
-  return map;
-}
-
-using LO = farra::LifeObject<1000>;
+using LO = farra::LifeObject;
 int main(int argc, char **argv)
 {
 
-  LO lo{};
+  // using type = std::pair<int,LO>;
+  // farra::flat_interval_map<int, LO, 2> im
+  // {
+  //   true, type{10, LO{}}, type{20, LO{}} 
+  // };
 
-  farra::flat_interval_map<int, LO, 1> im{};
-  im.assign(1, 5, std::move(lo));
+  
+
+  auto it = im.find(20);
+
+  //printContainer(im);
+
+  //im.assign(1, 5, LO{});
 
   return 0;
 }

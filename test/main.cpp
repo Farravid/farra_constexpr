@@ -1,60 +1,67 @@
 #include <gtest/gtest.h>
 #include "interval_map.hpp"
+#include "lifeobject.hpp"
 
-TEST(IntervalMapTest, Basic) 
+template <typename T>
+constexpr void printContainer(T &container)
 {
-    farra::flat_interval_map<int, char, 3> map { {{1, 'c'}}, 'z' };
-
-    EXPECT_EQ(map[0], 'z');
-    EXPECT_EQ(map[1], 'c');
+  for (const auto &item : container)
+    std::println("{}, {}", item.first, item.second);
 }
 
-TEST(IntervalMapTest, TestUpperBound) 
+TEST(IntervalMapTest, SingleAssign) 
 {
-    farra::flat_interval_map<int, char, 3> map { {{1, 'c'}}, '.' };
+	farra::flat_interval_map<int, char, 2> im {'A'};
+	im.assign(1,4,'B');
 
-    EXPECT_EQ(map.upper_bound(0)->second, 'c');
+	EXPECT_EQ(im[0], 'A');
+	EXPECT_EQ(im[1], 'B');
+	EXPECT_EQ(im[2], 'B');
+	EXPECT_EQ(im[3], 'B');
+	EXPECT_EQ(im[4], 'A');
+	EXPECT_EQ(im[5], 'A');
+	EXPECT_EQ(im.size(), 2);
 }
 
-TEST(IntervalMapTest, keyBeginfirst) 
+TEST(IntervalMapTest, FirstKeyBiggerOrSame) 
 {
-    farra::flat_interval_map<int, char, 5> map 
-    { 
-      {{1, 'B'}, {3, 'W'}, {4, '.'}, {6, 'D'}, {8, '.'}}, '.'
-    };
+	farra::flat_interval_map<int, char, 2> im {'A'};
+	im.assign(4,4,'B');
+	im.assign(8,4,'B');
 
-    const farra::flat_interval_map<int, char, 5> map2
-    { 
-      {{1, 'B'}, {3, 'W'}, {4, '.'}, {6, 'D'}, {8, '.'}}, '.'
-    };
+	EXPECT_EQ(im[0], 'A');
+	EXPECT_EQ(im[1], 'A');
+	EXPECT_EQ(im[2], 'A');
+	EXPECT_EQ(im[3], 'A');
+	EXPECT_EQ(im[4], 'A');
+	EXPECT_EQ(im[5], 'A');
+	EXPECT_EQ(im.size(), 0);
+}
 
-    map.clear({'z'});
-    map.assign(1,5, 'b');
+TEST(IntervalMapTest, ThreeAssign)
+{
+	farra::flat_interval_map<int, char, 4> im {'A'};
+    im.assign(1, 4, 'B');
+    im.assign(3, 6, 'C');
+    im.assign(4, 8, 'B');
 
+	printContainer(im);
 
-    // EXPECT_EQ(map[0], '.');
-    // EXPECT_EQ(map[1], 'B');
-    // EXPECT_EQ(map[2], 'B');
-    // EXPECT_EQ(map[3], 'W');
-    // EXPECT_EQ(map[4], '.');
-    // EXPECT_EQ(map[5], '.');
-    // EXPECT_EQ(map[6], 'D');
-    // EXPECT_EQ(map[7], 'D');
-    // EXPECT_EQ(map[8], '.');
-    // EXPECT_EQ(map[9], '.');
-    // EXPECT_EQ(map[10], '.');
+	EXPECT_EQ(im[0], 'A');
+	EXPECT_EQ(im[1], 'B');
+	EXPECT_EQ(im[2], 'B');
+	EXPECT_EQ(im[3], 'C');
+	EXPECT_EQ(im[4], 'B');
+	EXPECT_EQ(im[5], 'B');
+	EXPECT_EQ(im[6], 'B');
+	EXPECT_EQ(im[7], 'B');
+	EXPECT_EQ(im[8], 'A');
+	EXPECT_EQ(im.size(), 2);
+}
 
-    // map.assign(0, 5, 'C');
-
-    // EXPECT_EQ(map[0], 'C');
-    // EXPECT_EQ(map[1], 'C');
-    // EXPECT_EQ(map[2], 'C');
-    // EXPECT_EQ(map[3], 'C');
-    // EXPECT_EQ(map[4], 'C');
-    // EXPECT_EQ(map[5], '.');
-    // EXPECT_EQ(map[6], 'D');
-    // EXPECT_EQ(map[7], 'D');
-    // EXPECT_EQ(map[8], '.');
-    // EXPECT_EQ(map[9], '.');
-    // EXPECT_EQ(map[10], '.');
+TEST(IntervalMapTest, FirstEntrySameValue) 
+{
+	farra::flat_interval_map<int, char> im {'A'};
+    im.assign(1, 5, 'A');
+	EXPECT_EQ(im.size(), 0);
 }
