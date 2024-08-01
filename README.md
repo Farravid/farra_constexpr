@@ -1,5 +1,11 @@
 # farra_interval_map
-C++23 constexpr interval map
+Yet another constexpr data structure for C++23
+
+# Setup
+Just include the ```include``` folder on your compile path.
+## Dependencies
+* C++23
+* GCC 14.1
 
 # Usage
 
@@ -25,3 +31,6 @@ int main()
 	static_assert(im[17] == 'Z');
 }
 ```
+
+# Disclaimer
+This is just a learning project, nothing fancy production ready. Use
