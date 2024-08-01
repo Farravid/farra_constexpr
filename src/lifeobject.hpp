@@ -2,7 +2,6 @@
 #include <print>
 #include <source_location>
 #include <filesystem>
-//TODO: Maybe adding the stack trace could be cool for knowing where the call is coming
 
 namespace farra
 {
@@ -12,48 +11,69 @@ namespace farra
     public:
         LifeObject(const std::source_location sl = std::source_location::current()) noexcept
         {
-            // std::filesystem::path path {sl.file_name()};
-            // std::println("{} ({}:{}) `{}` -> {}", path.filename().string(), sl.line(), sl.column(), sl.function_name(),
-            //     "LifeObject() [constructor]");
+            #ifdef NDEBUG
+            #else
+            std::filesystem::path path {sl.file_name()};
+            std::println("{} ({}:{}) `{}` -> {}", path.filename().string(), sl.line(), sl.column(), sl.function_name(),
+                "LifeObject() [constructor]");
+            #endif
 
             ++timesConstructor;
         }
 
         LifeObject(const LifeObject& other, const std::source_location sl = std::source_location::current()) noexcept
         {
-            // std::filesystem::path path {sl.file_name()};
-            // std::println("{} ({}:{}) `{}` -> {}", path.filename().string(), sl.line(), sl.column(), sl.function_name(),
-            //     "LifeObject(const LifeObject&) [copy constructor]");
+            #ifdef NDEBUG
+            #else
+            std::filesystem::path path {sl.file_name()};
+            std::println("{} ({}:{}) `{}` -> {}", path.filename().string(), sl.line(), sl.column(), sl.function_name(),
+                "LifeObject(const LifeObject&) [copy constructor]");
+            #endif
 
             ++timesCopyConstructor;
         }
 
         LifeObject(LifeObject&&, const std::source_location sl = std::source_location::current()) noexcept
         {
-            // std::filesystem::path path {sl.file_name()};
-            // std::println("{} ({}:{}) `{}` -> {}", path.filename().string(), sl.line(), sl.column(), sl.function_name(),
-            //     "LifeObject(LifeObject&&) [move constructor]");
+            #ifdef NDEBUG
+            #else
+            std::filesystem::path path {sl.file_name()};
+            std::println("{} ({}:{}) `{}` -> {}", path.filename().string(), sl.line(), sl.column(), sl.function_name(),
+                "LifeObject(LifeObject&&) [move constructor]");
+            #endif
 
             ++timesMoveConstructor;
         }
 
         LifeObject& operator=(const LifeObject&) noexcept
         {
-            //std::println("{}", "operator=(const LifeObject&) [copy assignment]");
+            #ifdef NDEBUG
+            #else
+            std::println("{}", "operator=(const LifeObject&) [copy assignment]");
+            #endif
+
             ++timesCopyAssignment;
             return *this;
         }
 
         LifeObject& operator=(LifeObject&&) noexcept
         {
-            //std::println("{}", "operator=(LifeObject&&) [move assignment]");
+            #ifdef NDEBUG
+            #else
+            std::println("{}", "operator=(LifeObject&&) [move assignment]");
+            #endif
+
             ++timesMoveAssignment;
             return *this;
         }
 
         ~LifeObject() noexcept
         {
-            //std::println("{}", "~LifeObject() [destructor]");
+            #ifdef NDEBUG
+            #else
+            std::println("{}", "~LifeObject() [destructor]");
+            #endif
+
             ++timesDestructor;
         }
 

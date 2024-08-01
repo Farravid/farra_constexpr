@@ -5,6 +5,8 @@ target_interval=
 target_interval_test=
 target_interval_benchmark=
 
+build_type=Release
+
 if [[ "$1" == "benchmark" ]];
 then
     target_binary=$target_binary"_benchmark"
@@ -23,10 +25,15 @@ else
     target_interval=./interval_map
 fi
 
-conan install . --build=missing -pr=./conan_profile
-cd build/Release
+if [[ "$2" == "Debug" ]];
+then
+    build_type=Debug
+fi
+
+conan install conan/ --build=missing -pr=./conan/conan_profile --settings=build_type=$build_type
+cd build/$build_type
 source ./generators/conanbuild.sh
-cmake ../.. -DCMAKE_TOOLCHAIN_FILE="generators/conan_toolchain.cmake" -DCMAKE_BUILD_TYPE="Release"
+cmake ../.. -DCMAKE_TOOLCHAIN_FILE="generators/conan_toolchain.cmake" -DCMAKE_BUILD_TYPE="$build_type"
 cmake --build . $target_binary
 
 $target_interval
