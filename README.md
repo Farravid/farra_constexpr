@@ -33,4 +33,4 @@ int main()
 ```
 
 # Disclaimer
-This is just a learning project, nothing fancy production ready. Use
+> This is just a learning project, nothing fancy production ready. In fact you can only use this for constexpr construction because there is no assign mehtod or something. That wasn't the goal of this project. 
