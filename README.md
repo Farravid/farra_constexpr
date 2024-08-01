@@ -54,6 +54,7 @@ int main()
   * `constexpr`
   * Data structures
   * `<ranges>`
+  * `<concepts>`
   * C++23 deducing `this`
   * Perfect forwarding (`std::forward`)
   * Lifetime of objects (thanks to `lifeobject.hpp`)
