@@ -4,6 +4,8 @@ Yet another constexpr data structure for C++23
 > This is just a learning project, nothing fancy production ready.
 
 # Setup
+> For a header only setup you can switch to the include branch
+
 After cloning the repo, you only need to build the project with the handy bash script.
 
 This is the synstax for `build.sh` 
