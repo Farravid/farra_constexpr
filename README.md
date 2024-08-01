@@ -1,7 +1,7 @@
 # farra_interval_map
 Yet another constexpr data structure for C++23  
 
-> This is just a learning project, nothing fancy production ready.
+> This is just a learning project, nothing fancy production ready. In fact you can only use this for constexpr construction because there is no assign mehtod or something. That wasn't the goal of this project :). 
 
 # Setup
 > For a header only setup you can switch to the include branch
