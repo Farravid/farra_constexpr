@@ -11,7 +11,7 @@ namespace farra
 		//=========================================================================
         using key_type          		= _Key_t;
         using mapped_type       		= _Value_t;
-        using value_type        		= std::pair<_Key_t, _Value_t>;
+        using value_type        		= std::pair<if_optional_t<_Key_t>, if_optional_t<_Value_t>>;
         using storage_type        		= std::array<value_type, N>;
         using reference         		= std::pair<const key_type&, mapped_type&>;
         using const_reference   		= std::pair<const key_type&, const mapped_type&>;

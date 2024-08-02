@@ -30,7 +30,7 @@ then
     build_type=Debug
 fi
 
-conan install conan/ --build=missing -pr=./conan/conan_profile --settings=build_type=$build_type
+conan install . --build=missing -pr=./conan_profile --settings=build_type=$build_type
 cd build/$build_type
 source ./generators/conanbuild.sh
 cmake ../.. -DCMAKE_TOOLCHAIN_FILE="generators/conan_toolchain.cmake" -DCMAKE_BUILD_TYPE="$build_type"
