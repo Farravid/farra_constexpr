@@ -31,6 +31,13 @@ namespace farra
 		//=========================================================================
         template<typename... Args>
         requires less_than<N, Args...>
+        explicit constexpr flat_interval_map(Args&&... entries)
+            : index_{sizeof...(Args)}
+            , container_{std::forward<Args>(entries)...} 
+        {};
+
+        template<typename... Args>
+        requires less_than<N, Args...>
         explicit constexpr flat_interval_map(a_mapped_type&& value, Args&&... entries)
             : index_{sizeof...(Args)}
             , container_{std::forward<Args>(entries)...} 

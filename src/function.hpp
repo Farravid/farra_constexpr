@@ -11,6 +11,7 @@ namespace farra
     template<typename Return_t, typename... Args>
     struct function<Return_t(Args...)>
     {
+        constexpr function() noexcept = default;
         template<std::invocable Callable_t>
         constexpr explicit function(Callable_t callable) noexcept
             : fn{ std::make_unique<impl<Callable_t>>(callable) }
@@ -49,5 +50,4 @@ namespace farra
     //=========================================================================
 	// CTAD
 	//=========================================================================
-    //TODO: Tomorrow in order to learn
 }
