@@ -4,7 +4,7 @@ Yet another constexpr data structure for C++23
 `interval_map<K, V, std::size_t N>` is a data structure that efficiently associates intervals of keys of type K with values of type V. It is implemented on top of std::array, so we can say it is a flat interval map.
 
 This data structure is useful when you want to store a certain value for a certain interval/range.
-Some use cases are illustrated on [Use Cases](#UseCases)  
+Some use cases are illustrated on [Use Cases](#use-cases)  
 
 > This is just a learning project, nothing fancy production ready. In fact you can only use this for constexpr construction because there is no assign mehtod or something. That wasn't the goal of this project :). 
 
