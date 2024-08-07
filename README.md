@@ -1,6 +1,11 @@
 # farra_interval_map
 Yet another constexpr data structure for C++23  
 
+`interval_map<K, V, std::size_t N>` is a data structure that efficiently associates intervals of keys of type K with values of type V. It is implemented on top of std::array, so we can say it is a flat interval map.
+
+This data structure is useful when you want to store a certain value for a certain interval/range.
+Some use cases are illustrated on [Use Cases](#UseCases)  
+
 > This is just a learning project, nothing fancy production ready. In fact you can only use this for constexpr construction because there is no assign mehtod or something. That wasn't the goal of this project :). 
 
 # Setup
@@ -81,6 +86,43 @@ int main()
 	static_assert(im[7].x == 5); 
 }
 ```
+# Use Cases
+## Avoiding branches for optimization
+```C++
+int main()
+{
+    //We can get rid of branches using interval maps
+    //in a cleaner way and using less space than an array.
+
+    int value = 40;
+
+    //Instead of this
+    // std::array<float, 160> values
+    // {
+    //     10.f, 10.f....
+    //     20.f....
+    //     40.f..... until 160 values;
+    // }
+
+    //Instead of this
+    // if(value >= 1 && value <= 9) return 10.f;
+    // if(value >= 10 && value <= 19) return 10.f;
+    // if(value >= 20 && value <= 29) return 10.f;
+    // ....
+
+
+    //You have this
+    using t = farra::flat_interval_map<int, float, 5>::value_type;
+    constexpr farra::flat_interval_map<int, float, 5> map
+    {
+        -1,
+        t{1, 10.f}, t{10, 20.f}, t{20, 40.f}, t{30, 80.f}, t{30, 160.f} 
+    };
+
+
+    return map[value];
+}
+```
 
 # What did I refresh/learn?
 * C++
@@ -91,6 +133,7 @@ int main()
   * C++23 deducing `this`
   * Perfect forwarding (`std::forward`)
   * Lifetime of objects (thanks to `lifeobject.hpp`)
+  * CTAD
 * Tools and libraries
   * Google benchmark library
   * Google test library (gtest)

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <ranges>
 #include "util.hpp"
 namespace farra
@@ -109,6 +111,6 @@ namespace farra
     public:
         storage_type container_{};
         std::size_t index_{};
-        mapped_type initialValue_{};
+        if_optional_t<mapped_type> initialValue_{};
     };
 }
