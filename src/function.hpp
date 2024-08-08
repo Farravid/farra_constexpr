@@ -50,4 +50,15 @@ namespace farra
     //=========================================================================
 	// CTAD
 	//=========================================================================
+    template<typename Callable_t>
+    struct function_traits {};
+
+    template<typename Return_t, typename Class_t, typename ...Args>
+    struct function_traits<Return_t(Class_t::*) (Args...) const>
+    {
+        using type = Return_t(Args...);
+    };
+
+    template<typename Callable_t>
+    function(Callable_t) -> function<typename function_traits<decltype(&Callable_t::operator())>::type>;
 }
