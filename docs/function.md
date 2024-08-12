@@ -42,7 +42,7 @@ int main()
 ```
 # flat_interval_map
 We can also use `farra::function` in combination with `farra::flat_interval_map`   
-Quite cool honestly, so definitely check it out [here!](interval_map.md#use-cases)
+Quite cool honestly, so definitely check it out [here!](interval_map.md#usage#farra::function)
 
 # Use Cases
 The use cases are pretty much the same as `std::function`, just be creative and use it wherever you find it useful!   

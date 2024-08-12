@@ -1,29 +1,29 @@
+#include "interval_map.hpp"
 #include "function.hpp"
 
-constexpr float fn(float x, float y) { return x / y; }
+constexpr auto get_add()   { return farra::function{ [](int x, int y){ return x + y; } }; }
+constexpr auto get_sub()   { return farra::function{ [](int x, int y){ return x - y; } }; }
+constexpr auto get_mul()   { return farra::function{ [](int x, int y){ return x * y; } }; }
+constexpr auto get_div()   { return farra::function{ [](int x, int y){ return x / y; } }; }
 
-struct S
+constexpr auto get_im()
 {
-	constexpr float fn(float add) const //Make sure to add const to your member function in order to work!!
+	using im_t = farra::flat_interval_map<int, farra::function<int(int, int)>, 4>;
+	using t = im_t::value_type;
+
+	im_t im
 	{
-		return 40.f / 10.f + add;
-	}
-};
+		get_add(),
+		t{1, get_add()}, t{10, get_sub()}, t{20, get_mul()}, t{30, get_div()}
+	};
 
-constexpr auto get_free_fn()    { return farra::function{ fn }; }
-constexpr auto get_lambda()     { return farra::function{ []{ return 20 / 10; } }; }
-constexpr auto get_lambda_2()   { return farra::function{ [x = 10]{ return 20 / 10 + x; } }; }
-constexpr auto get_lambda_3()   { return farra::function{ [x = 10] (int y) { return 20 / 10 + x + y; } }; }
-constexpr auto get_member_fn()	{ return farra::function{ &S::fn }; }
-
+	return im;
+}
 
 int main()
 {
-	static_assert(get_free_fn()(10.f,20.f) == 0.5f);
-	static_assert(get_lambda()() == 2);
-	static_assert(get_lambda_2()() == 12);
-	static_assert(get_lambda_3()(20) == 32);
-
-	constexpr S s{};
-	static_assert(get_member_fn()(s, 20.f) == 24.f);
+	static_assert(get_im()[0](10,10) == 20);
+	static_assert(get_im()[12](10,10) == 0);
+	static_assert(get_im()[25](10,10) == 100);
+	static_assert(get_im()[35](10,10) == 1);
 }
