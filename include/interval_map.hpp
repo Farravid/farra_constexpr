@@ -1,3 +1,5 @@
+#pragma once
+
 #include <ranges>
 #include "util.hpp"
 namespace farra
@@ -29,13 +31,20 @@ namespace farra
 		//=========================================================================
         template<typename... Args>
         requires less_than<N, Args...>
-        explicit constexpr flat_interval_map(a_mapped_type&& value, Args&&... entries)
+        explicit constexpr flat_interval_map(Args&&... entries)
+            : index_{sizeof...(Args)}
+            , container_{std::forward<Args>(entries)...} 
+        {};
+
+        template<typename... Args>
+        requires less_than<N, Args...>
+        explicit constexpr flat_interval_map(auto&& value, Args&&... entries)
             : index_{sizeof...(Args)}
             , container_{std::forward<Args>(entries)...} 
             , initialValue_ {std::forward<a_mapped_type>(value)}
         {};
 
-        explicit constexpr flat_interval_map(a_mapped_type&& value) noexcept
+        explicit constexpr flat_interval_map(auto&& value) noexcept
             : initialValue_ {std::forward<a_mapped_type>(value)}
         {}
 
@@ -109,6 +118,6 @@ namespace farra
     public:
         storage_type container_{};
         std::size_t index_{};
-        mapped_type initialValue_{};
+        if_optional_t<mapped_type> initialValue_{};
     };
 }
