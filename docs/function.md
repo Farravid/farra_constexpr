@@ -1,3 +1,15 @@
+# farra::function
+
+Constexpr version of `std::function` using new C++23 `constexpr std::unique_ptr`.
+The functioning is pretty similar to `std::function` but it doesn't cover all the functionalities of the stl version.
+
+**CTAD** guides added for better usage.
+
+`farra::function` adds straight-forward **support for member functions** without any additional calls.
+
+# Usage
+
+```C++
 #include "function.hpp"
 
 constexpr float fn(float x, float y) { return x / y; }
@@ -27,3 +39,13 @@ int main()
 	constexpr S s{};
 	static_assert(get_member_fn()(s, 20.f) == 24.f);
 }
+```
+# flat_interval_map
+We can also use `farra::function` in combination with `farra::flat_interval_map`   
+Quite cool honestly, so definitely check it out [here!](interval_map.md#use-cases)
+
+# Use Cases
+The use cases are pretty much the same as `std::function`, just be creative and use it wherever you find it useful!   
+Feel free to share it here! So I can add it to this document.
+
+
